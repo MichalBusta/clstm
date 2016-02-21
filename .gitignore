@@ -13,3 +13,8 @@ build/
 *.os
 *.a
 *.so
+/Debug/
+/Release/
+/.project
+/.pydevproject
+/.sconsign.dblite

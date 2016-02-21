@@ -197,6 +197,19 @@ struct CLSTMOCR {
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
   }
+
+  void createBidi2(const std::vector<int> codec, int nhidden) {
+      nclasses = codec.size();
+      net = make_net("bidi2", {{"ninput", target_height},
+                              {"noutput", nclasses},
+                              {"nhidden", nhidden},
+							  {"nhidden2", nhidden}});
+      net->initialize();
+      net->codec.set(codec);
+      normalizer.reset(make_CenterNormalizer());
+      normalizer->target_height = target_height;
+    }
+
   std::wstring fwdbwd(TensorMap2 raw, const std::wstring &target) {
     normalizer->measure(raw);
     image.like(raw);

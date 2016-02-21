@@ -112,7 +112,7 @@ int main1(int argc, char **argv) {
     print("got", codec.size(), "classes");
 
     clstm.target_height = int(getrenv("target_height", 48));
-    clstm.createBidi(codec.codec, getienv("nhidden", 100));
+    clstm.createBidi2(codec.codec, getienv("nhidden", 100));
     clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   }
   network_info(clstm.net);

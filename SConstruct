@@ -101,6 +101,8 @@ else:
 # We need to compile the protocol buffer definition as part of the build.
 
 env.Protoc("clstm.proto")
+env.Append(LIBPATH=["/usr/local/lib"])
+
 
 cuda = env.Object("clstm_compute_cuda.o", "clstm_compute_cuda.cc",
            CXX="./nvcc-wrapper")
@@ -112,8 +114,8 @@ libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "clstm_compute.cc"]
 if option("gpu", 0):
   env.Append(LIBS=["cudart","cublas","cuda"])
-  env.Append(LIBPATH=["/usr/local/cuda/lib64"])
-  env.Append(CPPPATH=["/usr/local/cuda/include"])
+  env.Append(LIBPATH=["/usr/local/cuda-7.5/lib64"])
+  env.Append(CPPPATH=["/usr/local/cuda-7.5/include"])
   env.Append(CPPDEFINES={'CLSTM_CUDA' : 1, 'EIGEN_USE_GPU' : 1})
   libsrc = [cuda] + libsrc
 
