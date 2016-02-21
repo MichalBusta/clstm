@@ -66,11 +66,17 @@ struct Dataset {
     codec.build(gtnames, charsep);
   }
   void readSample(Tensor2 &raw, wstring &gt, int index) {
-    string fname = fnames[index];
-    string base = basename(fname);
-    gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
-    read_png(raw, fname.c_str());
-    raw() = -raw() + Float(1);
+
+	string fname = fnames[index];
+	try{
+
+		string base = basename(fname);
+		gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
+		read_png(raw, fname.c_str());
+		raw() = -raw() + Float(1);
+	}catch(...){
+		std::cout << "Bad sample: " << fname << std::endl;
+	}
   }
 };
 
@@ -112,7 +118,7 @@ int main1(int argc, char **argv) {
     print("got", codec.size(), "classes");
 
     clstm.target_height = int(getrenv("target_height", 48));
-    clstm.createBidi2(codec.codec, getienv("nhidden", 100));
+    clstm.createBidi(codec.codec, getienv("nhidden", 100));
     clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   }
   network_info(clstm.net);
