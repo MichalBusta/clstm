@@ -41,6 +41,8 @@ std::wstring utf8_to_utf32(std::string s) {
       THROW("unicode character out of range");
     }
     assert(w != 0);
+    if(w >=3000)
+    	w = 3005;
     result.push_back(wchar_t(w));
   }
   return result;
@@ -50,6 +52,8 @@ std::string utf32_to_utf8(std::wstring s) {
   std::string result;
   for (int i = 0; i < s.size(); i++) {
     unsigned c = s[i];
+    if(c >=3000)
+        c = 3005;
     if (c < 0x80) {
       result.push_back(char(c));
     } else if (c <= 0x7ff) {
