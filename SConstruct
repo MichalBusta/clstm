@@ -71,9 +71,15 @@ elif debug>0:
     env.Append(LINKFLAGS="-g".split())
 elif debug==0:
     #env.Append(CXXFLAGS="-g -O3 -DEIGEN_NO_DEBUG".split())
-    env.Append(CCFLAGS="-g -O3 -DEIGEN_NO_DEBUG -fopenmp".split())
+    if option("gpu", 0):
+        env.Append(CCFLAGS="-g -O3 -DEIGEN_NO_DEBUG".split())
+    else:
+        env.Append(CCFLAGS="-g -O3 -DEIGEN_NO_DEBUG -fopenmp".split())
 elif debug<0:
-    env.Append(CCFLAGS="-g -Ofast -DEIGEN_NO_DEBUG -finline -ffast-math -fno-signaling-nans -funsafe-math-optimizations -ffinite-math-only -march=native -fopenmp".split())
+    if option("gpu", 0):
+        env.Append(CCFLAGS="-g -Ofast -DEIGEN_NO_DEBUG -finline -ffast-math -fno-signaling-nans -funsafe-math-optimizations -ffinite-math-only -march=native".split())
+    else:
+        env.Append(CCFLAGS="-g -Ofast -DEIGEN_NO_DEBUG -finline -ffast-math -fno-signaling-nans -funsafe-math-optimizations -ffinite-math-only -march=native -fopenmp".split())
 
 # Try to locate the Eigen include files (they are in different locations
 # on different systems); you can specify an include path for Eigen with
@@ -88,7 +94,7 @@ else:
     inc = findonpath("Eigen/Eigen", [option("eigen")])
 
 env.Append(CPPPATH=[inc])
-env.Append(LIBS=["png", "protobuf"])
+env.Append(LIBS=["png", "protobuf", "gomp"])
 
 # You can enable display debugging with `display=1` (probably not working right now)
 

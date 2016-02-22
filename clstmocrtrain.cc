@@ -80,17 +80,23 @@ struct Dataset {
   }
 };
 
-pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset) {
+pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset, double test50) {
   double count = 0.0;
   double errors = 0.0;
+  test50 = 0;
   for (int test = 0; test < testset.size(); test++) {
     Tensor2 raw;
     wstring gt;
     testset.readSample(raw, gt, test);
     wstring pred = clstm.predict(raw());
     count += gt.size();
-    errors += levenshtein(pred, gt);
+    int dist = levenshtein(pred, gt);
+    errors += dist;
+    if( test < 50 ){
+    	test50 += dist;
+    }
   }
+  test50 /= 50;
   return make_pair(count, errors);
 }
 
@@ -125,6 +131,7 @@ int main1(int argc, char **argv) {
 
   double test_error = 9999.0;
   double best_error = 1e38;
+  double best_test50 = 1e38;
 
 #ifndef NODISPLAY
   PyServer py;
@@ -143,6 +150,10 @@ int main1(int argc, char **argv) {
 
   for (int trial = start; trial < ntrain; trial++) {
     int sample = lrand48() % trainingset.size();
+    if( trial < 4000 )
+    {
+    	sample = lrand48() % 450;
+    }
     Tensor2 raw;
     wstring gt;
     trainingset.readSample(raw, gt, sample);
@@ -169,18 +180,28 @@ int main1(int argc, char **argv) {
 #endif
 
     if (test_trigger(trial)) {
-      auto tse = test_set_error(clstm, testset);
+      double test50;
+      auto tse = test_set_error(clstm, testset, test50);
       double errors = tse.first;
       double count = tse.second;
       test_error = errors / count;
-      print("ERROR", trial, test_error, "   ", errors, count);
+      print("ERROR", trial, test_error, "   ", errors, count,  errors/(float)count, test50);
       if (test_error < best_error) {
         best_error = test_error;
         string fname = save_name + ".clstm";
         print("saving best performing network so far", fname, "error rate: ",
-              best_error);
+              best_error, test50);
         clstm.net->attr.set("trial", trial);
         clstm.save(fname);
+      }
+      if( test50 < best_test50  )
+      {
+    	  string fname = save_name + ".clstm";
+    	  print("saving best performing network so far", fname, "error rate: ",
+    			  best_error, test50);
+    	  clstm.net->attr.set("trial", trial);
+    	  clstm.save(fname);
+    	  best_test50 = test50;
       }
     }
 
