@@ -431,6 +431,8 @@ struct Stacked : INetwork {
         sub[n]->inputs = inputs;
       else
         sub[n]->inputs = sub[n - 1]->outputs;
+      if(n != 0)
+    	  sub[n]->inputs.zeroGrad();
       sub[n]->forward();
     }
     outputs = sub[sub.size() - 1]->outputs;

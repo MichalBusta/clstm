@@ -159,6 +159,7 @@ for (int trial = start; trial < ntrain; trial++) {
     if( true )
     {
 		fromSamples += 1;
+		fromSamples = std::min(fromSamples, trainingset.size() );
     	sample = lrand48() % fromSamples;
     }
     Tensor2 raw;
@@ -174,7 +175,7 @@ for (int trial = start; trial < ntrain; trial++) {
       print(trial);
       print("TRU", gt);
       print("ALN", clstm.aligned_utf8());
-      print("OUT", utf32_to_utf8(pred), dist / gt.size()));
+      print("OUT", utf32_to_utf8(pred), dist / gt.size());
       if (trial > 0 && report_time)
         print("steptime", (now() - start_time) / report_trigger.since());
       start_time = now();
