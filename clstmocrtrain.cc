@@ -99,7 +99,7 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset, double& t
     }
   }
   test50 /= count50;
-  return make_pair(count, errors);
+  return make_pair(errors, count);
 }
 
 int main1(int argc, char **argv) {
