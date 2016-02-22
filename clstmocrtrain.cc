@@ -80,7 +80,7 @@ struct Dataset {
   }
 };
 
-pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset, double test50) {
+pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset, double& test50) {
   double count = 0.0;
   double errors = 0.0;
   test50 = 0;
