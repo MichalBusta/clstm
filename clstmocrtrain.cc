@@ -84,6 +84,7 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset, double& t
   double count = 0.0;
   double errors = 0.0;
   test50 = 0;
+  double count50;
   for (int test = 0; test < testset.size(); test++) {
     Tensor2 raw;
     wstring gt;
@@ -94,9 +95,10 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset, double& t
     errors += dist;
     if( test < 50 ){
     	test50 += dist;
+    	count50 += gt.size();
     }
   }
-  test50 /= 50;
+  test50 /= count50;
   return make_pair(count, errors);
 }
 

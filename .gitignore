@@ -18,3 +18,5 @@ build/
 /.project
 /.pydevproject
 /.sconsign.dblite
+/libs/
+/.cproject

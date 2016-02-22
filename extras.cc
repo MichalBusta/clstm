@@ -41,6 +41,7 @@ extern "C" {
 #include "extras.h"
 #include "pytensor.h"
 #include "utils.h"
+#include "clstmhl.h"
 
 namespace ocropus {
 using namespace std;
@@ -559,4 +560,49 @@ void write_png(const char *name, TensorMap2 image) {
   write_png(stream, temp);
   fclose(stream);
 }
+
+CLSTMOCR clstm;
+
+void load_ocr(const string file)
+{
+	clstm.load(file);
+}
+
+double probability;
+
+string ocr_image(unsigned char* data, int rows, int cols)
+{
+	//std::cout << "Processing image: " << rows << "x" << cols << std::endl;
+	Tensor2 image;
+	image.resize(cols, rows);
+	unsigned char* dataPtr = (unsigned char*) data;
+	int offset = 0;
+	for (int i = 0; i < rows; i++) {
+		unsigned char* rowptr = &dataPtr[offset];
+		offset += cols;
+		for (int j = 0; j < cols; j++) {
+			int x = j;
+			int y = i;
+			image(x, y) = rowptr[j] / 255.0;
+		}
+	}
+	image() = -image() + Float(1);
+	//write_png("/tmp/ocr.png", image);
+	probability = 0;
+	string out = clstm.predict_utf8(image(), probability);
+	//std::cout << "Prediction: " << out << " with probability: " << probability << "in " << now() - start_time <<  std::endl;
+	//py.evalf("clf");
+	//show(py, clstm.net->inputs, 411);
+	//show(py, clstm.net->outputs, 412);
+	//show(py, clstm.targets, 413);
+
+	return out;
+}
+
+double get_ocr_prob()
+{
+	return probability;
+}
+
+
 }

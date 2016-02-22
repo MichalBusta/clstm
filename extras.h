@@ -50,6 +50,11 @@ INormalizer *make_CenterNormalizer();
 
 void read_png(Tensor2 &image, const char *name);
 void write_png(const char *name, TensorMap2 image);
+
+void load_ocr(const string file);
+double get_ocr_prob();
+string ocr_image(unsigned char* data, int rows, int cols);
+
 }
 
 #endif

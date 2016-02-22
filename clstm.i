@@ -24,6 +24,7 @@
 #include <memory>
 #include <iostream>
 #include "clstm.h"
+#include "extras.h"
 #include "clstm_compute.h"
 using namespace ocropus;
 using namespace std;
@@ -73,8 +74,6 @@ struct Classes {
 }
 
 struct Batch {
-  void resize(int,int);
-  void setZero(int,int);
   int rows();
   int cols();
   float &v(int,int);
@@ -145,6 +144,18 @@ void set_inputs(Network net, Sequence &inputs);
 void set_targets(Network net, Sequence &targets);
 void set_classes(Network net, Classes &classes);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
+
+void load_ocr(string);
+
+
+%include "numpy.i"
+
+
+
+%apply (unsigned char* IN_ARRAY2, int DIM1, int DIM2) {(unsigned char* data, int n, int m)}
+string ocr_image(unsigned char* data, int n, int m);
+
+double get_ocr_prob();
 
 std::shared_ptr<INetwork> make_layer(string);
 std::shared_ptr<INetwork> make_net_init(string,string);

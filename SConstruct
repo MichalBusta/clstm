@@ -158,16 +158,16 @@ all += [env.Program("test-2d", ["test-2d.cc"], LIBS=[libclstm] + libs)]
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"
 
-swigenv = env.Clone(SWIGFLAGS=["-python", "-c++"], SHLIBPREFIX="")
-swigenv.Tool("swig")
-swigenv.Append(SWIG="3.0")
-swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
-pyswig = swigenv.SharedLibrary("_clstm.so",
-                               ["clstm.i", "clstm.cc", "clstm_proto.cc", "extras.cc",
+if option("pyswig", 0):
+    swigenv = env.Clone( SWIGFLAGS=["-python","-c++"], SHLIBPREFIX="")
+    swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
+    swigenv.SharedLibrary("_clstm.so",
+                          ["clstm.i", "clstm.cc", "clstm_proto.cc", "extras.cc",
                                 "clstm.pb.cc", "clstm_compute.cc",
-                               "clstm_prefab.cc", "ctc.cc"],
-                               LIBS=libs)
-Alias('pyswig', [pyswig])
+                               "clstm_prefab.cc", "ctc.cc", "batches.cc"],
+                          LIBS=libs)
+
+
 
 destlib = distutils.sysconfig.get_config_var("DESTLIB")
 Alias('pyinstall',

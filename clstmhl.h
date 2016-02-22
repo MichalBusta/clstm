@@ -274,6 +274,20 @@ struct CLSTMOCR {
   std::string predict_utf8(TensorMap2 raw) {
     return utf32_to_utf8(predict(raw));
   }
+  
+  std::string predict_utf8(TensorMap2 raw, double& probability) {
+	  vector<CharPrediction> preds;
+	  predict(preds, raw);
+	  probability = 0;
+	  std::wstring out;
+	  for (size_t i = 0; i < preds.size(); i++) {
+		  out += preds[i].c;
+		  probability += preds[i].p;
+	  }
+	  probability /= preds.size();
+	  return utf32_to_utf8(out);
+  }
+  
   void get_outputs(Tensor2 &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
