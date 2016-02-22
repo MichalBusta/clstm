@@ -21,7 +21,7 @@ static vector<string> reported;
 
 bool reported_params(const char *name) {
   string s(name);
-  for (int i = 0; i < reported.size(); i++)
+  for (int i = 0; i < (int) reported.size(); i++)
     if (reported[i] == s) return true;
   reported.push_back(s);
   return false;
@@ -40,7 +40,7 @@ Assoc::Assoc(const string &s) {
   for (;;) {
     int pos = s.find(":", start);
     string kvp;
-    if (pos == string::npos) {
+    if (pos == (int) string::npos) {
       kvp = s.substr(start);
       start = s.size();
     } else {
@@ -48,11 +48,11 @@ Assoc::Assoc(const string &s) {
       start = pos + 1;
     }
     int q = kvp.find("=");
-    if (q == string::npos) THROW("no '=' in Assoc");
+    if (q == (int) string::npos) THROW("no '=' in Assoc");
     string key = kvp.substr(0, q);
     string value = kvp.substr(q + 1);
     (*this)[key] = value;
-    if (start >= s.size()) break;
+    if (start >= (int) s.size()) break;
   }
 }
 
@@ -71,7 +71,7 @@ void walk_states(Network net, StateFun f, const string &prefix, bool io) {
 void walk_networks(Network net, NetworkFun f, const string &prefix) {
   string nprefix = prefix + "." + net->kind;
   f(nprefix, net.get());
-  for (int i = 0; i < net->sub.size(); i++) {
+  for (int i = 0; i < (int) net->sub.size(); i++) {
     walk_networks(net->sub[i], f, nprefix);
   }
 }
@@ -106,7 +106,7 @@ Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
   }
   net->attr.set("ninput", ninput);
   net->attr.set("noutput", noutput);
-  for (int i = 0; i < subs.size(); i++) {
+  for (int i = 0; i < (int) subs.size(); i++) {
     net->add(subs[i]);
     subs[i]->attr.super = &net->attr;
   }
@@ -151,7 +151,7 @@ void set_targets(Network net, Sequence &targets) {
 }
 void set_classes(Network net, Classes &classes) {
   int N = net->outputs.size();
-  assert(N == classes.size());
+  assert(N == (int) classes.size());
   assert(net->outputs.size() == N);
   // FIXME remove TensorMap operations
   for (int t = 0; t < N; t++) {
@@ -211,7 +211,7 @@ void sgd_update(Network net) {
     for (int i = 0; i < s.size(); i++) clip_gradient(s[i], sgc);
   }
   for (auto it : net->parameters) sgd_update(*it.second, lr, momentum);
-  for (int i = 0; i < net->sub.size(); i++) sgd_update(net->sub[i]);
+  for (int i = 0; i < (int) net->sub.size(); i++) sgd_update(net->sub[i]);
   net->nseq = 0;
   net->nsteps = 0;
 }
@@ -219,14 +219,14 @@ void sgd_update(Network net) {
 void Codec::set(const vector<int> &a) {
   codec = a;
   encoder.reset(new map<int, int>());
-  for (int i = 0; i < codec.size(); i++) {
+  for (int i = 0; i < (int) codec.size(); i++) {
     encoder->insert(make_pair(codec[i], i));
   }
 }
 
 void Codec::encode(Classes &classes, const std::wstring &s) {
   classes.clear();
-  for (int pos = 0; pos < s.size(); pos++) {
+  for (int pos = 0; pos < (int) s.size(); pos++) {
     unsigned c = s[pos];
     assert(encoder->count(c) > 0);
     c = (*encoder)[c];
@@ -239,7 +239,7 @@ wchar_t Codec::decode(int cls) { return wchar_t(codec[cls]); }
 
 std::wstring Codec::decode(Classes &classes) {
   std::wstring s;
-  for (int i = 0; i < classes.size(); i++)
+  for (int i = 0; i < (int) classes.size(); i++)
     s.push_back(wchar_t(codec[classes[i]]));
   return s;
 }
@@ -262,7 +262,7 @@ void Codec::build(const vector<string> &fnames, const wstring &extra) {
   }
   vector<int> codec;
   for (auto c : codes) codec.push_back(c);
-  for (int i = 1; i < codec.size(); i++) assert(codec[i] > codec[i - 1]);
+  for (int i = 1; i < (int) codec.size(); i++) assert(codec[i] > codec[i - 1]);
   this->set(codec);
 }
 
@@ -426,7 +426,7 @@ struct Stacked : INetwork {
     assert(inputs.rows() > 0);
     assert(inputs.cols() > 0);
     assert(sub.size() > 0);
-    for (int n = 0; n < sub.size(); n++) {
+    for (int n = 0; n < (int) sub.size(); n++) {
       if (n == 0)
         sub[n]->inputs = inputs;
       else
@@ -441,7 +441,7 @@ struct Stacked : INetwork {
     assert(outputs.size() > 0);
     assert(outputs.size() == inputs.size());
     for (int n = sub.size() - 1; n >= 0; n--) {
-      if (n + 1 == sub.size())
+      if (n + 1 == (int) sub.size())
         for (int t = 0; t < outputs.size(); t++)
           sub[n]->outputs[t].d = outputs[t].d;
       else
@@ -608,6 +608,8 @@ struct GenericNPLSTM : INetwork {
     gf.resize(N, no, bs);
     ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
+    outputs.zeroGrad();
+    assert(!anynan(inputs));
     assert(inputs.getGpu() == gpu);
     for (int t = 0; t < N; t++) {
       forward_stack_delay(source[t], inputs[t], outputs, t - 1);
@@ -618,6 +620,7 @@ struct GenericNPLSTM : INetwork {
       forward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
       forward_nonlingate(outputs[t], state[t], go[t], H);
     }
+    assert(!anynan(outputs));
   }
   void backward() {
     clearStateDerivs();
@@ -685,8 +688,13 @@ void set_inputs(Network net, TensorMap2 inputs) {
   int N = inputs.dimension(0);
   int d = inputs.dimension(1);
   net->inputs.resize(N, d, 1);
+  net->inputs.zeroGrad();
   for (int t = 0; t < N; t++)
-    for (int i = 0; i < d; i++) net->inputs[t].v(i, 0) = inputs(t, i);
+    for (int i = 0; i < d; i++){
+    	net->inputs[t].v(i, 0) = inputs(t, i);
+    	assert(!isnan(inputs(t, i)));
+    }
+  assert(!anynan(net->inputs));
 }
 void set_targets(Network net, TensorMap2 targets) {
   int N = targets.dimension(0);
@@ -706,7 +714,7 @@ void set_classes(Network net, Tensor<int, 1> &targets) {
 static void get_allparams(vector<vector<Params *>> &allparams,
                           vector<Network> &networks) {
   allparams.resize(networks.size());
-  for (int i = 0; i < allparams.size(); i++) {
+  for (int i = 0; i < (int) allparams.size(); i++) {
     Network net = networks[i];
     walk_params(net, [i, &allparams](const string &s, Params *p) {
       allparams[i].push_back(p);
@@ -810,7 +818,7 @@ void set_states(Network net, const Float *data, int total, int gpu) {
 }
 
 void clear_states(Network net) {
-  int index = 0;
+  //int index = 0;
   walk_states(  //
       net, [&](const string &, Sequence *p) { p->clear(); }, "", true);
 }
@@ -860,8 +868,8 @@ void set_params(Network net, const Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
-    int n = p->v.rows();
-    int m = p->v.cols();
+    //int n = p->v.rows();
+    //int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
     if (index + p->v.total_size() > total) THROW("get_params size mismatch");
     memcpy(p->v.ptr, params + index, nbytes);
@@ -874,8 +882,8 @@ void get_params(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
-    int n = p->v.rows();
-    int m = p->v.cols();
+    //int n = p->v.rows();
+    //int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
     if (index + p->v.total_size() > total) THROW("get_params size mismatch");
     memcpy(params + index, p->v.ptr, nbytes);
@@ -895,8 +903,8 @@ void get_derivs(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
-    int n = p->v.rows();
-    int m = p->v.cols();
+    //int n = p->v.rows();
+    //int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
     memcpy(params + index, p->d.ptr, nbytes);
     index += p->v.total_size();
@@ -908,8 +916,8 @@ void set_derivs(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
-    int n = p->v.rows();
-    int m = p->v.cols();
+    //int n = p->v.rows();
+    //int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
     memcpy(p->d.ptr, params + index, nbytes);
     index += p->v.total_size();

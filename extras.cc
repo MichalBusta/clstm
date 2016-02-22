@@ -28,7 +28,9 @@ extern "C" {
 #ifdef GOOGLE
 #include "third_party/png/png.h"
 #else
-#include <png.h>
+#ifndef ANDROID
+#	include <png.h>
+#endif
 #endif
 #undef __sigsetjmp
 }
@@ -42,6 +44,7 @@ extern "C" {
 #include "pytensor.h"
 #include "utils.h"
 #include "clstmhl.h"
+#include "batches.h"
 
 namespace ocropus {
 using namespace std;
@@ -282,6 +285,7 @@ struct CenterNormalizer : INormalizer {
         out(i, j) = bilin(in, x, y);
       }
     }
+    assert(!anynan(out));
   }
 };
 
@@ -312,6 +316,7 @@ INormalizer *make_Normalizer(const string &name) {
 
 bool png_flip = false;
 
+#ifndef ANDROID
 void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
   int d;
   int spp;
@@ -522,11 +527,13 @@ void write_png(FILE *fp, Tensor<unsigned char, 3> &image) {
 
   png_destroy_write_struct(&png_ptr, &info_ptr);
 }
+#endif
 
 inline double clip(double value, double lo, double hi) {
   return value < lo ? lo : value > hi ? hi : value;
 }
 
+#ifndef ANDROID
 void read_png(Tensor2 &image, const char *name) {
   Tensor<unsigned char, 3> temp;
   FILE *stream = fopen(name, "r");
@@ -560,11 +567,13 @@ void write_png(const char *name, TensorMap2 image) {
   write_png(stream, temp);
   fclose(stream);
 }
+#endif
 
 CLSTMOCR clstm;
 
 void load_ocr(const string file)
 {
+	clstm.target_height = 32;
 	clstm.load(file);
 }
 

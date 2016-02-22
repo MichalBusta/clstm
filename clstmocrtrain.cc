@@ -65,7 +65,8 @@ struct Dataset {
     for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
     codec.build(gtnames, charsep);
   }
-  void readSample(Tensor2 &raw, wstring &gt, int index) {
+
+  string readSample(Tensor2 &raw, wstring &gt, int index) {
 
 	string fname = fnames[index];
 	try{
@@ -77,6 +78,7 @@ struct Dataset {
 	}catch(...){
 		std::cout << "Bad sample: " << fname << std::endl;
 	}
+	return fname;
   }
 };
 
@@ -126,7 +128,7 @@ int main1(int argc, char **argv) {
     print("got", codec.size(), "classes");
 
     clstm.target_height = int(getrenv("target_height", 48));
-    clstm.createBidi(codec.codec, getienv("nhidden", 100));
+    clstm.createBidi2(codec.codec, getienv("nhidden", 100));
     clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   }
   network_info(clstm.net);
@@ -150,22 +152,29 @@ int main1(int argc, char **argv) {
   Trigger report_trigger(getienv("report_every", 100), ntrain, start);
   Trigger display_trigger(getienv("display_every", 0), ntrain, start);
 
-  for (int trial = start; trial < ntrain; trial++) {
+ int fromSamples = 450 + 10000;
+
+for (int trial = start; trial < ntrain; trial++) {
     int sample = lrand48() % trainingset.size();
-    if( trial < 4000 )
+    if( true )
     {
-    	sample = lrand48() % 450;
+		fromSamples += 1;
+    	sample = lrand48() % fromSamples;
     }
     Tensor2 raw;
     wstring gt;
-    trainingset.readSample(raw, gt, sample);
+    string fname = trainingset.readSample(raw, gt, sample);
+
     wstring pred = clstm.train(raw(), gt);
 
     if (report_trigger(trial)) {
+      std::cout << fname << std::endl;
+      double dist = levenshtein(pred, gt);
+
       print(trial);
       print("TRU", gt);
       print("ALN", clstm.aligned_utf8());
-      print("OUT", utf32_to_utf8(pred));
+      print("OUT", utf32_to_utf8(pred), dist / gt.size()));
       if (trial > 0 && report_time)
         print("steptime", (now() - start_time) / report_trigger.since());
       start_time = now();
@@ -181,7 +190,7 @@ int main1(int argc, char **argv) {
     }
 #endif
 
-    if (test_trigger(trial)) {
+    if (test_trigger(trial) && trial > start + 1) {
       double test50;
       auto tse = test_set_error(clstm, testset, test50);
       double errors = tse.first;
@@ -195,8 +204,8 @@ int main1(int argc, char **argv) {
               best_error, test50);
         clstm.net->attr.set("trial", trial);
         clstm.save(fname);
-      }
-      if( test50 < best_test50  )
+	best_test50 = std::min(test50, best_test50);
+      }else if( test50 < best_test50  )
       {
     	  string fname = save_name + ".clstm";
     	  print("saving best performing network so far", fname, "error rate: ",
@@ -206,13 +215,13 @@ int main1(int argc, char **argv) {
     	  best_test50 = test50;
       }
     }
-
+    /*
     if (save_trigger(trial)) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
       print("saving", fname);
       clstm.net->attr.set("trial", trial);
       clstm.save(fname);
-    }
+    }*/
   }
 
   return 0;

@@ -143,10 +143,10 @@ struct Sequence {
   Batch &operator[](int i) { return steps[i]; }
   const Batch &operator[](int i) const { return steps[i]; }
   void zero() {
-    for (int t = 0; t < steps.size(); t++) steps[t].clear();
+    for (int t = 0; t < (int) steps.size(); t++) steps[t].clear();
   }
   void zeroGrad() {
-    for (int t = 0; t < steps.size(); t++) steps[t].zeroGrad();
+    for (int t = 0; t < (int) steps.size(); t++) steps[t].zeroGrad();
   }
 };
 
@@ -158,6 +158,9 @@ void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos",
            Float offset = 0.0);
 void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif",
            Float offset = 0.0);
+
+bool anynan(Tensor2 &a);
+bool anynan(TensorMap2 a);
 bool anynan(Batch &a);
 bool anynan(Params &a);
 bool anynan(Sequence &a);

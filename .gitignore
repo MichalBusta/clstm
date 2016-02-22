@@ -20,3 +20,9 @@ build/
 /.sconsign.dblite
 /libs/
 /.cproject
+/clstm_wrap.cc
+/clstm_wrap.cpp
+/clstmfilter
+/clstm.pb.cc
+/clstm.pb.h
+/nvcc.log

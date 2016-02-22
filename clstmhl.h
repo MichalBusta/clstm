@@ -89,7 +89,7 @@ struct CLSTMText {
     seq.resize(cs.size() * (neps + 1) + neps, d, 1);
     int index = 0;
     for (int i = 0; i < neps; i++) seq[index++].clear();
-    for (int pos = 0; pos < cs.size(); pos++) {
+    for (int pos = 0; pos < (int) cs.size(); pos++) {
       TensorMap2 v = *seq[index++].v;
       v.setZero();
       v(cs[pos], 0) = 1.0;
@@ -146,7 +146,7 @@ struct CLSTMText {
 struct CLSTMOCR {
   shared_ptr<INormalizer> normalizer;
   Network net;
-  int target_height = 48;
+  int target_height = 32;
   int nclasses = -1;
   Sequence aligned, targets;
   Tensor2 image;
@@ -262,7 +262,7 @@ struct CLSTMOCR {
     vector<int> where;
     trivial_decode(outputs, net->outputs, 0, &where);
     preds.clear();
-    for (int i = 0; i < outputs.size(); i++) {
+    for (int i = 0; i < (int) outputs.size(); i++) {
       int t = where[i];
       int cls = outputs[i];
       wchar_t c = net->codec.decode(outputs[i]);

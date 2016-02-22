@@ -280,8 +280,8 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   assert(x.rows() == m - 1);
 #ifdef CLSTM_ALL_TENSOR
   int bs = y.cols();
-  Indexes2 offsets{0, 1};
-  Indexes2 sizes{n, m - 1};
+  //Indexes2 offsets{0, 1};
+  //Indexes2 sizes{n, m - 1};
   Axes1 axes01{IndexPair(1, 0)};
   y.v().device(*dev) = W1.v.map1().contract(x.v(), axes01);
   Indexes2 shape{n, 1};

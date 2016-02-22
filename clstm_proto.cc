@@ -91,7 +91,7 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
     array->set_name(name);
     proto_of_params(array, *a, weights);
   }
-  for (int i = 0; i < net->sub.size(); i++) {
+  for (int i = 0; i < (int) net->sub.size(); i++) {
     clstm::NetworkProto *subproto = proto->add_sub();
     proto_of_net(subproto, net->sub[i].get(), weights);
   }

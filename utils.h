@@ -6,7 +6,9 @@
 #ifndef ocropus_clstm_utils_
 #define ocropus_clstm_utils_
 
-#include <glob.h>
+#ifndef ANDROID
+#	include <glob.h>
+#endif
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -44,15 +46,17 @@ inline double now() {
   return tv.tv_sec + 1e-6 * tv.tv_usec;
 }
 
+#ifndef ANDROID
 inline void glob(vector<string> &result, const string &arg) {
   result.clear();
   glob_t buf;
   glob(arg.c_str(), GLOB_TILDE, nullptr, &buf);
-  for (int i = 0; i < buf.gl_pathc; i++) {
+  for (int i = 0; i < (int) buf.gl_pathc; i++) {
     result.push_back(buf.gl_pathv[i]);
   }
   if (buf.gl_pathc > 0) globfree(&buf);
 }
+#endif
 
 inline string basename(string s) {
   int start = 0;

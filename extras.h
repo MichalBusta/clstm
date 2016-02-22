@@ -6,7 +6,9 @@
 #ifndef ocropus_clstm_extras_
 #define ocropus_clstm_extras_
 
-#include <glob.h>
+#ifndef ANDROID
+#	include <glob.h>
+#endif
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -48,8 +50,10 @@ INormalizer *make_NoNormalizer();
 INormalizer *make_MeanNormalizer();
 INormalizer *make_CenterNormalizer();
 
+#ifndef ANDROID
 void read_png(Tensor2 &image, const char *name);
 void write_png(const char *name, TensorMap2 image);
+#endif
 
 void load_ocr(const string file);
 double get_ocr_prob();

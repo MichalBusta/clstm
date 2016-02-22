@@ -72,11 +72,28 @@ void rinit(Sequence &m, int N, int r, int c, Float s, const char *mode,
 
 // checking for NaNs in different objects
 
+
+bool anynan(Tensor2 &a) {
+  for (int j = 0; j < a.dimension(0); j++) {
+    for (int k = 0; k < a.dimension(1); k++) {
+      float x = a(j, k);
+      if (isnan(x))
+      {
+    	  return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool anynan(TensorMap2 a) {
   for (int j = 0; j < a.dimension(0); j++) {
     for (int k = 0; k < a.dimension(1); k++) {
       float x = a(j, k);
-      if (isnan(x)) return true;
+      if (isnan(x))
+      {
+    	  return true;
+      }
     }
   }
   return false;
@@ -95,7 +112,10 @@ bool anynan(Params &a) {
 
 bool anynan(Sequence &a) {
   for (int i = 0; i < a.size(); i++)
-    if (anynan(a[i])) return true;
+    if (anynan(a[i]))
+    {
+    	return true;
+    }
   return false;
 }
 }

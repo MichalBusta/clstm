@@ -10,7 +10,7 @@
 
 namespace {
 std::wstring utf8_to_utf32(std::string s) {
-  int i = 0;
+  size_t i = 0;
   std::wstring result;
   while (i < s.size()) {
     unsigned c = unsigned(s[i]);
@@ -50,7 +50,7 @@ std::wstring utf8_to_utf32(std::string s) {
 
 std::string utf32_to_utf8(std::wstring s) {
   std::string result;
-  for (int i = 0; i < s.size(); i++) {
+  for (size_t i = 0; i < s.size(); i++) {
     unsigned c = s[i];
     if(c >=3000)
         c = 3005;
