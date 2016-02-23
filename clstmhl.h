@@ -203,7 +203,8 @@ struct CLSTMOCR {
       net = make_net("bidi2", {{"ninput", target_height},
                               {"noutput", nclasses},
                               {"nhidden", nhidden},
-							  {"nhidden2", nhidden}});
+							  {"nhidden2", nhidden},
+							  {"gpu", 1}});
       net->initialize();
       net->codec.set(codec);
       normalizer.reset(make_CenterNormalizer());
