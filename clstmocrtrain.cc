@@ -66,7 +66,7 @@ struct Dataset {
     codec.build(gtnames, charsep);
   }
 
-  string readSample(Tensor2 &raw, wstring &gt, int index) {
+  string readSample(Tensor2 &raw, wstring &gt, int index, bool drouOut = false) {
 
 	string fname = fnames[index];
 	try{
@@ -75,6 +75,16 @@ struct Dataset {
 		gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
 		read_png(raw, fname.c_str());
 		raw() = -raw() + Float(1);
+		if( drouOut )
+		{
+			int N = raw.dimension(0);
+			int d = raw.dimension(1);
+			for (int t = 0; t < N; t++)
+				for (int i = 0; i < d; i++){
+					if(lrand48() % 10 > 5)
+						raw(t, i) = 0;
+				}
+		}
 	}catch(...){
 		std::cout << "Bad sample: " << fname << std::endl;
 	}

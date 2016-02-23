@@ -444,13 +444,16 @@ struct Stacked : INetwork {
     assert(outputs.size() == inputs.size());
     for (int n = sub.size() - 1; n >= 0; n--) {
       if (n + 1 == (int) sub.size())
+		#pragma omp parallel for
         for (int t = 0; t < outputs.size(); t++)
           sub[n]->outputs[t].d = outputs[t].d;
       else
+		#pragma omp parallel for
         for (int t = 0; t < sub[n + 1]->inputs.size(); t++)
           sub[n]->outputs[t].d = sub[n + 1]->inputs[t].d;
       sub[n]->backward();
     }
+	#pragma omp parallel for
     for (int t = 0; t < sub[0]->inputs.size(); t++)
       inputs[t].d = sub[0]->inputs[t].d;
   }
