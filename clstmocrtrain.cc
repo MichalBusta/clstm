@@ -174,7 +174,7 @@ for (int trial = start; trial < ntrain; trial++) {
     }
     Tensor2 raw;
     wstring gt;
-    string fname = trainingset.readSample(raw, gt, sample);
+    string fname = trainingset.readSample(raw, gt, sample, true);
 
     wstring pred = clstm.train(raw(), gt);
 
