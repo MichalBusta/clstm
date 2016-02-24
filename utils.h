@@ -66,6 +66,7 @@ inline string basename(string s) {
     start = pos + 1;
   }
   auto pos = s.find(".", start);
+  pos = s.length() - 4;
   if (pos == string::npos)
     return s;
   else
